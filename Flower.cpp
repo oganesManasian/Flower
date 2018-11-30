@@ -6,8 +6,20 @@ HRESULT Flower::Create(ID3D11Device* g_pd3dDevice, ID3D11DeviceContext* g_pImmed
     pd3dDevice = g_pd3dDevice;
     pImmediateContext = g_pImmediateContext;
 
+    Node* curFather = NULL;
+    // Create stem
     root = new Stem();
-    root->Init(NULL, g_pd3dDevice, g_pImmediateContext);
+    root->Init(curFather, g_pd3dDevice, g_pImmediateContext);
+    curFather = root;
+
+    // Create stalk
+    Node* stalk = new Stalk();
+    stalk->Init(curFather, g_pd3dDevice, g_pImmediateContext);
+    curFather->childs.push_back(stalk);
+    curFather = stalk;
+
+    // Create petal
+    // .. TODO
 
     return hr;
 }

@@ -13,9 +13,11 @@ public:
     Node* parent;
     ID3D11DeviceContext* pImmediateContext = nullptr;
     ID3D11Device* pd3dDevice = nullptr;
-    ID3D11Buffer* pVertexBuffer = nullptr;
-    ID3D11Buffer* pIndexBuffer = nullptr;
+    std::vector<ID3D11Buffer*> vVertexBuffer;
+    std::vector<ID3D11Buffer*> vIndexBuffer;
+    std::vector<D3D_PRIMITIVE_TOPOLOGY> vTopology;
+    std::vector<int> verticesNumber;
+    std::vector<int> indicesNumber;
     ID3D11Buffer* pConstantBuffer = nullptr;
-    int verticesNumber;
-    int indicesNumber;
+
 };
