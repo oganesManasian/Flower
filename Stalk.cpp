@@ -3,10 +3,10 @@
 #include "Figures.h"
 #include <vector>
 
-const float STEM_HEIGHT = 0.1f;
-const float STEM_HEIGHT0 = 0.f;
-const float STEM_RADIUS = 1.f;
-const int STEM_POINTS_NUMBER = 10;
+const float STALK_HEIGHT = 0.1f;
+const float STALK_HEIGHT0 = 0.f;
+const float STALK_RADIUS = 0.7f;
+const int STALK_POINTS_NUMBER = 20;
 const XMFLOAT4 yellowColor = XMFLOAT4(1.0, 1.0, 0.0, 1.0);
 
 HRESULT Stalk::Init(Node* parentNode, ID3D11Device* g_pd3dDevice, ID3D11DeviceContext* g_pImmediateContext) {
@@ -16,50 +16,41 @@ HRESULT Stalk::Init(Node* parentNode, ID3D11Device* g_pd3dDevice, ID3D11DeviceCo
     pImmediateContext = g_pImmediateContext;
     parent = parentNode;
 
-    // Create figure
+    // Create cylinder
     std::vector<SimpleVertex> *vVerticesCylinder = new std::vector<SimpleVertex>();
     std::vector<WORD> *vIndicesCylinder = new std::vector<WORD>();
-    D3D_PRIMITIVE_TOPOLOGY topology = CreateCylinder(vVerticesCylinder, vIndicesCylinder, STEM_HEIGHT0, STEM_HEIGHT, STEM_RADIUS, STEM_POINTS_NUMBER, yellowColor);
+    D3D_PRIMITIVE_TOPOLOGY topology = CreateCylinder(vVerticesCylinder, vIndicesCylinder, 
+        STALK_HEIGHT0, STALK_HEIGHT, STALK_RADIUS, STALK_POINTS_NUMBER, yellowColor);
+    
     vTopology.push_back(topology);
-    indicesNumber.push_back(vIndicesCylinder->size());
-    verticesNumber.push_back(vVerticesCylinder->size());
+    verticesNumber.push_back(int(vVerticesCylinder->size()));
+    indicesNumber.push_back(int(vIndicesCylinder->size()));
 
-    // Create vertex buffer
-    ID3D11Buffer* vertexBuffer;
-    D3D11_BUFFER_DESC bd;
-    ZeroMemory(&bd, sizeof(bd));
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(SimpleVertex) * verticesNumber.at(0);
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-    D3D11_SUBRESOURCE_DATA InitData;
-    ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = &(*vVerticesCylinder)[0];
-    hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &vertexBuffer);
-    vVertexBuffer.push_back(vertexBuffer);
-    if (FAILED(hr))
-        return hr;
+    CreateVertexIndexConstantBuffers(vVerticesCylinder, vIndicesCylinder);
 
-    // Create index buffer
-    ID3D11Buffer* indexBuffer;
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(WORD) * indicesNumber.at(0);
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-    InitData.pSysMem = &(*vIndicesCylinder)[0];
-    hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &indexBuffer);
-    vIndexBuffer.push_back(indexBuffer);
-    if (FAILED(hr))
-        return hr;
+    // Create upper circle
+    std::vector<SimpleVertex> *vVerticesUpperCircle = new std::vector<SimpleVertex>();
+    std::vector<WORD> *vIndicesUpperCircle = new std::vector<WORD>();
+    topology = CreateCircle(vVerticesUpperCircle, vIndicesUpperCircle,
+        STALK_HEIGHT0 + STALK_HEIGHT, STALK_RADIUS, STALK_POINTS_NUMBER, yellowColor, true);
 
-    // Create the constant buffer
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(ConstantBuffer);
-    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    bd.CPUAccessFlags = 0;
-    hr = g_pd3dDevice->CreateBuffer(&bd, nullptr, &pConstantBuffer);
-    if (FAILED(hr))
-        return hr;
+    vTopology.push_back(topology);
+    verticesNumber.push_back(int(vVerticesUpperCircle->size()));
+    indicesNumber.push_back(int(vIndicesUpperCircle->size()));
+
+    CreateVertexIndexConstantBuffers(vVerticesUpperCircle, vIndicesUpperCircle);
+
+    // Create lower circle
+    std::vector<SimpleVertex> *vVerticesLowerCircle = new std::vector<SimpleVertex>();
+    std::vector<WORD> *vIndicesLowerCircle = new std::vector<WORD>();
+    topology = CreateCircle(vVerticesLowerCircle, vIndicesLowerCircle,
+        STALK_HEIGHT0, STALK_RADIUS, STALK_POINTS_NUMBER, yellowColor, false);
+
+    vTopology.push_back(topology);
+    verticesNumber.push_back(int(vVerticesLowerCircle->size()));
+    indicesNumber.push_back(int(vIndicesLowerCircle->size()));
+
+    CreateVertexIndexConstantBuffers(vVerticesLowerCircle, vIndicesLowerCircle);
 
     // Create childs
     // ... TODO

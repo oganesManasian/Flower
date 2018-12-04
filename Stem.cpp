@@ -5,8 +5,8 @@
 
 const float STEM_HEIGHT = 2.f;
 const float STEM_HEIGHT0 = -2.f;
-const float STEM_RADIUS = 0.5f;
-const int STEM_POINTS_NUMBER = 10;
+const float STEM_RADIUS = 0.2f;
+const int STEM_POINTS_NUMBER = 20;
 const XMFLOAT4 greenColor = XMFLOAT4(0.0, 1.0, 0.0, 1.0);
 
 HRESULT Stem::Init(Node* parentNode, ID3D11Device* g_pd3dDevice, ID3D11DeviceContext* g_pImmediateContext) {
@@ -16,97 +16,34 @@ HRESULT Stem::Init(Node* parentNode, ID3D11Device* g_pd3dDevice, ID3D11DeviceCon
     pImmediateContext = g_pImmediateContext;
     parent = parentNode;
 
-    // Create figure
+    // Create cylinder
     std::vector<SimpleVertex> *vVertices = new std::vector<SimpleVertex>();
     std::vector<WORD> *vIndices = new std::vector<WORD>();
-    D3D_PRIMITIVE_TOPOLOGY topology = CreateCylinder(vVertices, vIndices, STEM_HEIGHT0, STEM_HEIGHT, STEM_RADIUS, STEM_POINTS_NUMBER, greenColor);
+    D3D_PRIMITIVE_TOPOLOGY topology = CreateCylinder(vVertices, vIndices, 
+        STEM_HEIGHT0, STEM_HEIGHT, STEM_RADIUS, STEM_POINTS_NUMBER, greenColor);
+    
     vTopology.push_back(topology);
-    indicesNumber.push_back(vIndices->size());
-    verticesNumber.push_back(vVertices->size());
+    indicesNumber.push_back(int(vIndices->size()));
+    verticesNumber.push_back(int(vVertices->size()));
 
-    // Create vertex buffer
-    ID3D11Buffer* vertexBuffer;
-    D3D11_BUFFER_DESC bd;
-    ZeroMemory(&bd, sizeof(bd));
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(SimpleVertex) * verticesNumber.at(0);
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-    D3D11_SUBRESOURCE_DATA InitData;
-    ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = &(*vVertices)[0];
-    hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &vertexBuffer);
-    vVertexBuffer.push_back(vertexBuffer);
-    if (FAILED(hr))
-        return hr;
+    CreateVertexIndexConstantBuffers(vVertices, vIndices);
 
-    // Create index buffer
-    ID3D11Buffer* indexBuffer;
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(WORD) * indicesNumber.at(0);
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-    InitData.pSysMem = &(*vIndices)[0];
-    hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &indexBuffer);
-    vIndexBuffer.push_back(indexBuffer);
-    if (FAILED(hr))
-        return hr;
+    // Create lower circle
+    std::vector<SimpleVertex> *vVerticesLowerCircle = new std::vector<SimpleVertex>();
+    std::vector<WORD> *vIndicesLowerCircle = new std::vector<WORD>();
+    topology = CreateCircle(vVerticesLowerCircle, vIndicesLowerCircle,
+        STEM_HEIGHT0, STEM_RADIUS, STEM_POINTS_NUMBER, greenColor, false);
 
-    // Create the constant buffer
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(ConstantBuffer);
-    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    bd.CPUAccessFlags = 0;
-    hr = g_pd3dDevice->CreateBuffer(&bd, nullptr, &pConstantBuffer);
-    if (FAILED(hr))
-        return hr;
+    vTopology.push_back(topology);
+    verticesNumber.push_back(int(vVerticesLowerCircle->size()));
+    indicesNumber.push_back(int(vIndicesLowerCircle->size()));
+
+    CreateVertexIndexConstantBuffers(vVerticesLowerCircle, vIndicesLowerCircle);
 
     // Create childs
     // ... TODO
 
     return hr;
-    /*
-    // Vertices' buffer
-    float height = 0.0f;
-    SimpleVertex vertices[VERTICES_NUMBER] = {
-        {XMFLOAT3(0.0, 0.0, height), XMFLOAT4(1.0, 0.0, 0.0, 1.0)},
-        {XMFLOAT3(1.0, 0.0, height), XMFLOAT4(0.0, 1.0, 0.0, 1.0)},
-        {XMFLOAT3(0.0, 1.0, height), XMFLOAT4(0.0, 0.0, 1.0, 1.0)},
-        {XMFLOAT3(1.0, 1.0, height), XMFLOAT4(1.0, 1.0, 1.0, 1.0)},
-    };
-
-    D3D11_BUFFER_DESC bd;
-    ZeroMemory(&bd, sizeof(bd));
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(SimpleVertex) * VERTICES_NUMBER;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-    D3D11_SUBRESOURCE_DATA InitData;
-    ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = vertices;
-    hr = pd3dDevice->CreateBuffer(&bd, &InitData, &pVertexBuffer);
-    if (FAILED(hr))
-        return hr;
-
-    // Set primitive topology
-    pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    // Indices' buffer
-    WORD indices[INDICES_NUMBER] = {
-        2, 0, 3,
-        0, 1, 3
-    };
-
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(WORD) * INDICES_NUMBER;
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-    InitData.pSysMem = indices;
-    hr = pd3dDevice->CreateBuffer(&bd, &InitData, &pIndexBuffer);
-    if (FAILED(hr))
-        return hr;
-    return hr;
-    */
 }
 
 void Stem::Render(ConstantBuffer cb, ID3D11VertexShader* g_pVertexShader, ID3D11PixelShader* g_pPixelShader) {

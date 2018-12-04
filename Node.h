@@ -8,7 +8,8 @@ public:
     virtual HRESULT Init(Node* parent, ID3D11Device* g_pd3dDevice, ID3D11DeviceContext* g_pImmediateContext) = 0;
     virtual void Render(ConstantBuffer cb, ID3D11VertexShader* g_pVertexShader, ID3D11PixelShader* g_pPixelShader) = 0;
     virtual void Release() = 0;
-//protected:
+    void AddChild(Node* child);
+protected:
     std::vector<Node*> childs;
     Node* parent;
     ID3D11DeviceContext* pImmediateContext = nullptr;
@@ -19,5 +20,6 @@ public:
     std::vector<int> verticesNumber;
     std::vector<int> indicesNumber;
     ID3D11Buffer* pConstantBuffer = nullptr;
-
+protected:
+    HRESULT CreateVertexIndexConstantBuffers(std::vector<SimpleVertex> *vertices, std::vector<WORD> *indices);
 };

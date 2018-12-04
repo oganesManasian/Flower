@@ -15,10 +15,10 @@ HRESULT Flower::Create(ID3D11Device* g_pd3dDevice, ID3D11DeviceContext* g_pImmed
     // Create stalk
     Node* stalk = new Stalk();
     stalk->Init(curFather, g_pd3dDevice, g_pImmediateContext);
-    curFather->childs.push_back(stalk);
+    curFather->AddChild(stalk);// childs.push_back(stalk);
     curFather = stalk;
 
-    // Create petal
+    // Create petals
     // .. TODO
 
     return hr;
