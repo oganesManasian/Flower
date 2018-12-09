@@ -6,3 +6,5 @@ Debug
 *.user
 *.filters
 *.vcxproj
+*.ipch
+.vs/

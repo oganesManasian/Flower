@@ -2,12 +2,13 @@
 #include <d3d11_1.h>
 #include "Figures.h"
 #include <vector>
+#include "FlowerParameters.h"
 
-const float STALK_HEIGHT = 0.1f;
-const float STALK_HEIGHT0 = 0.f;
-const float STALK_RADIUS = 0.7f;
-const int STALK_POINTS_NUMBER = 20;
-const XMFLOAT4 yellowColor = XMFLOAT4(1.0, 1.0, 0.0, 1.0);
+Stalk::Stalk(void) {
+    gWorld = XMMatrixIdentity();
+    XMMATRIX rotation180 = XMMatrixRotationY(PI);
+    gWorldBack = rotation180 * gWorld;
+}
 
 HRESULT Stalk::Init(Node* parentNode, ID3D11Device* g_pd3dDevice, ID3D11DeviceContext* g_pImmediateContext) {
     HRESULT hr = S_OK;
@@ -52,57 +53,9 @@ HRESULT Stalk::Init(Node* parentNode, ID3D11Device* g_pd3dDevice, ID3D11DeviceCo
 
     CreateVertexIndexConstantBuffers(vVerticesLowerCircle, vIndicesLowerCircle);
 
-    // Create childs
-    // ... TODO
-
     return hr;
 }
 
-void Stalk::Render(ConstantBuffer cb, ID3D11VertexShader* g_pVertexShader, ID3D11PixelShader* g_pPixelShader) {
-    XMMATRIX gWorld;
-
-    // Update constant buffer
-    pImmediateContext->UpdateSubresource(pConstantBuffer, 0, nullptr, &cb, 0, 0);
-
-    for (int i = 0; i < int(vTopology.size()); i++)
-    {
-        // Set vertex buffer
-        UINT stride = sizeof(SimpleVertex);
-        UINT offset = 0;
-        pImmediateContext->IASetVertexBuffers(0, 1, &vVertexBuffer.at(i), &stride, &offset);
-
-        // Set index buffer
-        pImmediateContext->IASetIndexBuffer(vIndexBuffer.at(i), DXGI_FORMAT_R16_UINT, 0);
-
-        // Set primitive topology
-        pImmediateContext->IASetPrimitiveTopology(vTopology.at(i));
-
-        pImmediateContext->VSSetShader(g_pVertexShader, nullptr, 0);
-        pImmediateContext->VSSetConstantBuffers(0, 1, &pConstantBuffer);
-        pImmediateContext->PSSetShader(g_pPixelShader, nullptr, 0);
-        pImmediateContext->DrawIndexed(indicesNumber.at(i), 0, 0);
-    }
-
-    // Render childs
-    for (Node* child : childs) {
-        child->Render(cb, g_pVertexShader, g_pPixelShader);
-    }
-}
-
-void Stalk::Release(void) {
-    // Release childs
-    for (Node* child : childs) {
-        child->Release();
-    }
-
-    // Self release (index, vertex buffers and so on)
-    for (int i = 0; i < int(vTopology.size()); i++)
-    {
-        if (vVertexBuffer.at(i)) vVertexBuffer.at(i)->Release();
-        if (vIndexBuffer.at(i)) vIndexBuffer.at(i)->Release();
-    }
-
-    //if (pVertexShader) pVertexShader->Release();
-    //if (pPixelShader) pPixelShader->Release();
-    // TODO Think how to release constant buffer
+void Stalk::ComputeWorldMatrix(float t) {
+    t;
 }

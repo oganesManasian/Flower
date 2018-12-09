@@ -116,13 +116,14 @@ D3D_PRIMITIVE_TOPOLOGY CreateCircle(std::vector<SimpleVertex> *vertices, std::ve
 }
 
 D3D_PRIMITIVE_TOPOLOGY CreateTrapeze(std::vector<SimpleVertex> *vertices, std::vector<WORD> *indices,
-    XMFLOAT3 centrPoint, XMFLOAT3 norm, float height, float lowerWidth, float upperWidth, XMFLOAT4 color, bool isUpsideDown) {
+    float height, float lowerWidth, float upperWidth, XMFLOAT4 color) {
     D3D_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-    XMFLOAT3 leftLower = XMFLOAT3(0.f, -height / 2, -lowerWidth / 2);
-    XMFLOAT3 leftUpper = XMFLOAT3(0.f, height / 2, -upperWidth / 2);
-    XMFLOAT3 rightUpper = XMFLOAT3(0.f, height / 2, upperWidth / 2);
-    XMFLOAT3 rightLower = XMFLOAT3(0.f, -height / 2, lowerWidth / 2);
+    XMFLOAT3 leftLower  =   XMFLOAT3(   0.f,   0.f,     -lowerWidth / 2);
+    XMFLOAT3 leftUpper  =   XMFLOAT3(   0.f,   height,  -upperWidth / 2);
+    XMFLOAT3 rightUpper =   XMFLOAT3(   0.f,   height,  upperWidth / 2 );
+    XMFLOAT3 rightLower =   XMFLOAT3(   0.f,   0.f,     lowerWidth / 2 );
+
     vertices->push_back({ leftLower, color });
     vertices->push_back({ leftUpper, color });
     vertices->push_back({ rightUpper, color });

@@ -23,6 +23,10 @@
 #include "DataStructures.h"
 #include "Flower.h"
 
+#define _CRTDBG_MAP_ALLOC  
+#include <stdlib.h>  
+#include <crtdbg.h> 
+
 using namespace DirectX;
 
 //--------------------------------------------------------------------------------------
@@ -64,7 +68,7 @@ const float MAX_DELTA = 1.05f;
 const int WINDOW_BORDER = 10;
 const int MAX_ZOOM = 15;
 const int MIN_ZOOM = 2;
-const float PI = 3.14159;
+
 
 //--------------------------------------------------------------------------------------
 // Forward declarations
@@ -428,13 +432,6 @@ HRESULT InitDevice()
     // Create flower
     g_pFlower = new Flower();
     g_pFlower->Create(g_pd3dDevice, g_pImmediateContext);
-    //Stem* stem = new Stem();
-    //g_pFlowerRoot = stem;
-    //stem->Init(NULL, g_pd3dDevice, g_pImmediateContext, g_pVertexShader, g_pPixelShader);
-    //g_pConstantBuffer = g_pFlower->pConstantBuffer;
-    
-    //// Initialize the world matrix
-	//g_World1 = XMMatrixIdentity();
 
     // Initialize the view matrix
 	XMVECTOR At = XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
@@ -443,6 +440,7 @@ HRESULT InitDevice()
 
     // Initialize the projection matrix
 	g_Projection = XMMatrixPerspectiveFovLH( XM_PIDIV2, width / (FLOAT)height, 0.01f, 100.0f );
+
 
     return S_OK;
 }
@@ -465,10 +463,19 @@ void CleanupDevice()
     if( g_pSwapChain ) g_pSwapChain->Release();
     if( g_pImmediateContext1 ) g_pImmediateContext1->Release();
     if( g_pImmediateContext ) g_pImmediateContext->Release();
+
+    if (g_pFlower) g_pFlower->Release();
+
+//#ifdef _DEBUG
+//    ID3D11Debug* DebugDevice = nullptr;
+//    HRESULT Result = g_pd3dDevice->QueryInterface(&DebugDevice);
+//    DebugDevice->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+//    DebugDevice->Release();
+//#endif
+
     if( g_pd3dDevice1 ) g_pd3dDevice1->Release();
     if( g_pd3dDevice ) g_pd3dDevice->Release();
 
-    if (g_pFlower) g_pFlower->Release();
 }
 
 

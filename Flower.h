@@ -2,6 +2,8 @@
 #include "Node.h"
 #include "Stem.h"
 #include "Stalk.h"
+#include "Petal.h"
+#include "FlowerParameters.h"
 
 class Flower {
 private:
